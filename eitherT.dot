@@ -1,25 +1,78 @@
 digraph eitherT {
-  label="EitherT in cats"
+  // rankdir=LR
+  label="EitherT in cats\n\n\n"
   labelloc=top
   fontname="times-italic"
+  color=grey
+  style=dotted
 
-  A [shape=oval fontname=courier]
-  B [shape=oval fontname=courier]
-  FA [shape=oval label="F[A]" fontname=courier]
-  FB [shape=oval label="F[B]" fontname=courier]
-  EAB [shape=oval label="Either[A, B]" fontname=courier]
-  EFAB [shape=oval label="EitherT[F, A, B]" fontname=courier]
-  FEAB [shape=oval label="F[Either[A, B]]" fontname=courier]
-  A -> EAB [label="asLeft[B]" fontname="times-italic" fontcolor=grey color=grey]
-  B -> EAB [label="asRight[A]" fontname="times-italic" fontcolor=grey color=grey]
-  A -> FA [label="pure[F]" fontname="times-italic" fontcolor=grey color=grey]
-  B -> FB [label="pure[F]" fontname="times-italic" fontcolor=grey color=grey]
-  B -> EFAB [label="EitherT.pure[F, A]" fontname="times-italic" fontcolor=grey color=grey]
-  FA -> EFAB [label="EitherT.left[A]" fontname="times-italic" fontcolor=grey color=grey]
-  FB -> EFAB [label="EitherT.right[A]" fontname="times-italic" fontcolor=grey color=grey]
-//  EAB -> EFAB [label="EitherT.fromEither[F]" fontcolor=grey color=grey]
-  FB -> FEAB  [label="map(_.asRight[A])" fontname="times-italic" fontcolor=grey color=grey]
-  EAB -> EFAB [label="toEitherT[F]" fontname="times-italic" fontcolor=grey color=grey]
-  EAB -> FEAB [label="pure[F]" fontname="times-italic" fontcolor=grey color=grey]
-  FEAB -> EFAB [label="EitherT.apply" fontname="times-italic" fontcolor=grey color=grey]
+  node [shape=oval fontname="courier-bold" color=grey]
+  edge [fontcolor=black color=grey fontname="courier"]
+
+  # issue: ] inside of < > seems to not be parsed correctly, replace with escape code &#93;
+
+  subgraph cluster_efea {
+    color=white
+    label=""
+    EFEA [label=<EitherT[F, <font color="red3">E</font>, <font color="green3">A</font>&#93;>]
+  }
+  
+  "error type" [shape=none fontname="times" fontcolor=grey]
+  "success type" [shape=none fontname="times" fontcolor=grey]
+
+  "error type" -> E [style=dashed arrowhead=onormal]
+  "success type" -> A [style=dashed arrowhead=empty]
+
+  subgraph cluster_intro {
+    label="introduction forms"
+
+    E [fontcolor=red3]
+    A [fontcolor=green3]
+    FE [label=<F[<font color="red3">E</font>&#93;>]
+    FA [label=<F[<font color="green3">A</font>&#93;>]
+    EAB [label=<Either[<font color="red3">E</font>, <font color="green3">A</font>&#93;>]
+    FEAB [label=<F[Either[<font color="red3">E</font>, <font color="green3">A</font>&#93;&#93;>]
+
+    E -> EAB [label="asLeft[B]" fontcolor=grey]
+    A -> EAB [label="asRight[A]" fontcolor=grey]
+    E -> FE [label="pure[F]" fontcolor=grey]
+    A -> FA [label="pure[F]" fontcolor=grey]
+    E -> EFEA [label=<EitherT.<font color="red3">leftT</font>[F, <font color="green3">A</font>&#93;>]
+    A -> EFEA [label=<EitherT.<font color="green3">rightT</font>[F, <font color="red3">E</font>&#93;>]
+    FE -> EFEA [label=<EitherT.<font color="red3">left</font>[<font color="green3">A</font>&#93;>]
+    FA -> EFEA [label=<EitherT.<font color="green3">right</font>[<font color="red3">E</font>&#93;>]
+    EAB -> EFEA [label="EitherT.fromEither[F]"]
+    // FB -> FEAB  [label="map(_.asRight[A])" fontcolor=grey]
+    // EAB -> EFEA [label="toEitherT[F]"]
+    EAB -> FEAB [label="pure[F]" fontcolor=grey]
+    FEAB -> EFEA [label="EitherT.apply"]
+  }
+
+  subgraph cluster_elim {
+    label="elimination forms"
+
+    FEAB_ [label=<F[Either[<font color="red3">E</font>, <font color="green3">A</font>&#93;&#93;>]
+    FB_ [label=<F[<font color="green3">A</font>&#93;>]
+    FB [label="F[B]"]
+
+    EFEA -> FEAB_ [label="value"]
+    EFEA -> FB [label=<fold[B]<br/>(fa: <font color="red3">E</font> ⇒ B,<br/>fb: <font color="green3">A</font> ⇒ B)>]
+    EFEA -> FB_ [label=<getOrElse<br/>(default: ⇒ <font color="green3">A</font>)>]
+    EFEA -> FB_ [label=<valueOr<br/>(f: <font color="red3">E</font> ⇒ <font color="green3">A</font>)>]
+  }
+
+  subgraph cluster_more_combinators {
+    label="combinators"
+
+    EFEA_ [label=<EitherT[F, <font color="red3">E</font>, <font color="green3">A</font>&#93;>]
+    EFEB [label=<EitherT[F, <font color="red3">E</font>, <font color="green3">B</font>&#93;>]
+    EFE2A [label=<EitherT[F, <font color="red3">E2</font>, <font color="green3">A</font>&#93;>]
+    EFE2B [label=<EitherT[F, <font color="red3">E2</font>, <font color="green3">B</font>&#93;>]
+
+    EFEA_ -> EFEA_ [label=<ensure<br/>(onFailure: ⇒ <font color="red3">E</font>)<br/>(f: <font color="green3">A</font>  ⇒ Boolean)>]
+    EFEA_ -> EFEA_ [headport=w label=<adaptError<br/>(pf: PartialFunction[<font color="red3">E</font>, <font color="red3">E</font>])>]
+    EFEA_ -> EFE2A [tailport=sw label=<leftMap<br/>(f: <font color="red3">E</font> ⇒ <font color="red3">E2</font>)>]
+    EFEA_ -> EFEB [tailport=se label=<map<br/>(f: <font color="green3">A</font> ⇒ <font color="green3">B</font>)>]
+    EFEA_ -> EFE2B [tailport=s label=<bimap<br/>(f: <font color="red3">E</font> ⇒ <font color="red3">E2</font>,<br/>g: <font color="green3">A</font> ⇒ <font color="green3">B</font>)>]
+  }
 }
