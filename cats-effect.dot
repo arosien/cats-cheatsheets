@@ -1,0 +1,73 @@
+digraph G {
+  rankdir=LR
+  node [fontname=courier shape=none]
+  edge [fontname=courier color=grey fontcolor=grey60]
+  labelloc=t
+  fontname="times-italic"
+  // fontsize=32
+  // style=dotted
+  color=white
+
+  label="cats-effect"
+  
+  feab [label=<F[Either[<font color="red3">A</font>, <font color="blue3">B</font>&#93;]>]
+  // subgraph cluster_fa {
+  //   label=""
+  fa [label=<F[<font color="red3">A</font>&#93;>]
+  // }
+  fb [label=<F[<font color="blue3">B</font>&#93;>]
+  lazy_a [label=<<font color="red3">⇒ A</font>>]
+  ioa [label=<IO[<font color="red3">A</font>&#93;>]
+  cb [label=<(Either[Throwable, <font color="red3">A</font>&#93; ⇒ Unit) ⇒ Unit>]
+  fu [label="F[Unit]"]
+
+  subgraph cluster_bracket {
+    label=""
+    // bgcolor=green
+    
+    fa -> fb [label=<Bracket[F].bracket(_)<br/>(<font color="red3">A</font> ⇒ F[<font color="blue3">B</font>&#93;)<br/>(<font color="red3">A</font> ⇒ F[Unit&#93;)>]
+  }
+
+  // a -> fa [label="Apply[F].pure"]
+  subgraph cluster_sync {
+    label=""
+  lazy_a -> fa [label="Sync[F].delay"]
+  }
+  cb -> fa [label="Async[F].async"]
+
+  subgraph cluster_io {
+    label=""
+
+    future_a [label=<Future[<font color="red3">A</font>&#93;>]
+    io_future_a [label=<IO[Future[<font color="red3">A</font>&#93;&#93;>]
+    
+    ioa -> fa [label="LiftIO.liftIO"]
+    ioa -> future_a [label="unsafeToFuture"]
+    future_a -> io_future_a [label="IO.delay"]
+    io_future_a -> ioa [label="IO.fromFuture"]
+  }
+
+  subgraph cluster_concurrent {
+    label="Concurrent[F]"
+    bgcolor=lightcyan
+
+    fafb [label=<(F[<font color="red3">A</font>], F[<font color="blue3">B</font>])>]
+    cancel [label=<(Either[Throwable, <font color="red3">A</font>&#93; ⇒ Unit) ⇒ CancelToken[F]>]
+  
+    f_fiber_fa [label=<F[Fiber[F, <font color="red3">A</font>&#93;]>]  
+    fiber [label=<Fiber[F, <font color="red3">A</font>&#93;>]
+    
+    cancel -> fa [label="Concurrent[F].cancelable"]
+    fa -> f_fiber_fa [label="Concurrent[F].start"]
+    fafb -> feab [label="Concurrent[F].race"]
+    fiber -> fa [label="join"]
+    fiber -> fu [label="cancel"]
+    f_fiber_fa -> fiber [style=dotted arrowhead=none]
+  }
+
+  syncio_unit [label="SyncIO[Unit]"]
+  fa -> syncio_unit [label=<Effect[F].runAsync(_)<br/>(Either[Throwable, <font color="red3">A</font>&#93; ⇒ IO[Unit])>]
+  
+  syncio_cancel [label="SyncIO[CancelToken[F]]"]
+  fa -> syncio_cancel [label=<ConcurrentEffect[F].runCancelable(_)<br/>(Either[Throwable, <font color="red3">A</font>&#93; ⇒ IO[Unit])>]
+}

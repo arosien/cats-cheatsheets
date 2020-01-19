@@ -1,0 +1,39 @@
+digraph G {
+  rankdir=LR
+  node [shape=box]
+  edge []
+  labelloc=t
+  fontname="times-italic"
+  style=dashed
+
+  subgraph cluster_domain {
+    label=Domain
+
+    model
+    algebra
+    service
+
+    algebra -> model [label="describes behavior of"]
+    service -> algebra [label="composes one or more"]
+    service -> algebra [label="constrains effect type of"]
+  }
+
+  subgraph cluster_infrastructure {
+    label=Infrastructure
+
+    implementation
+
+    implementation -> algebra [label="implements for some effect type"]
+  }
+
+  effect_type [label="effect type"]
+  resource
+  main
+  config
+
+  main -> config [label="has"]
+  main -> resource [label="uses one or more"]
+  resource -> lifecycle [label="manages"]
+  service -> effect_type [label="parameterized by"]
+  algebra -> effect_type [label="parameterized by"]
+}

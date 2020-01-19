@@ -1,0 +1,29 @@
+digraph G {
+  rankdir=LR
+  node [shape=none]
+  edge []
+  labelloc=t
+  fontname="times-italic"
+  style=dashed
+  label="Arrows compose, so, in A, g composed with f produces the arrow (g. f).\nIf F is a functor from A to B, then every object and arrow in A is mapped to an object and arrow in B.\nTherefore (g. f) in A is mapped to F(g. f) in B.\nBut arrows compose in B, so Fg . Ff = F(g. f), i.e., the functor fusion law."
+
+  subgraph cluster_abc {
+    label=A
+    bgcolor=pink
+    a -> b [label=f]
+    b -> c [label=g]
+    a -> c [label="g . f"]
+  }
+
+  subgraph cluster_F {
+    label=B
+    bgcolor=steelblue1
+    Fa -> Fb [label=Ff]
+    Fb -> Fc [label=Fg]
+    Fa -> Fc [label="F(g . f)"]
+  }
+
+  a -> Fa [label=F]
+  b -> Fb [label=F]
+  c -> Fc [label=F]
+}

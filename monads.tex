@@ -1,0 +1,108 @@
+\documentclass{tufte-handout}
+
+%\geometry{showframe}% for debugging purposes -- displays the margins
+
+\usepackage{amsmath}
+
+% Set up the images/graphics package
+\usepackage{graphicx}
+\setkeys{Gin}{width=\linewidth,totalheight=\textheight,keepaspectratio}
+\graphicspath{{graphics/}}
+
+% The following package makes prettier tables.  We're all about the bling!
+\usepackage{booktabs}
+
+% The units package provides nice, non-stacked fractions and better spacing
+% for units.
+\usepackage{units}
+
+% The fancyvrb package lets us customize the formatting of verbatim
+% environments.  We use a slightly smaller font.
+\usepackage{fancyvrb}
+\fvset{fontsize=\normalsize}
+
+% Small sections of multiple columns
+\usepackage{multicol}
+\usepackage{multirow}
+
+\newcommand{\fa}{F[A]}
+\newcommand{\fb}{F[B]}
+\newcommand{\rarr}{\texttt{=>}}
+\newcommand{\fTwo}[2]{\texttt{#1} & \rarr & & & \texttt{#2}}
+\newcommand{\fThree}[3]{\texttt{#1} & \rarr & \texttt{#2} & \rarr & \texttt{#3}}
+\newcommand{\sdocUrl}[1]{https://typelevel.org/cats/api/cats/#1.html}
+\newcommand{\sdocHref}[1]{\href{\sdocUrl{#1}}{#1}}
+
+\title{cats Monads Cheat Sheet}
+\author[Adam Rosien]{Adam Rosien (\href{mailto:adam@rosien.net}{adam@rosien.net})}
+% if the \date{} command is left out, the current date will be used
+% \date{2 December 2014}
+
+\begin{document}
+
+\maketitle% this prints the handout title, author, and date
+
+\section{Installation}\label{sec:installation}
+
+\noindent In your \texttt{build.sbt} file:
+
+% \begin{fullwidth}
+\begin{quote}
+  \ttfamily libraryDependencies += "org.typelevel" \%\% "cats-core" \% "1.0.0-MF"
+\end{quote}
+% \end{fullwidth}
+
+\noindent Then in your \texttt{.scala} files:
+
+\begin{quote}
+  \ttfamily import cats.\_
+\end{quote}
+
+\section{Monads}
+
+\begin{table}[ht]
+  \centering
+  \fontfamily{ppl}\selectfont
+  \setlength{\tabcolsep}{5pt}
+  \begin{tabular}{rrrlcll}
+    \texttt{F} & \texttt{\fa} &  & \texttt{(A => \fb)} & & \texttt{\fb} \\
+    \midrule
+    \texttt{Id[A]}               & \fThree{A}{(A => B)}{B} \\
+    \texttt{Reader[E, A]}      & \fThree{E => A}{(A => (E => B))}{E => B} \\
+    \texttt{ReaderT[F, E, A]}      & \fThree{E => F[A]}{(A => (E => F[B]))}{E => F[B]} \\
+    \texttt{Writer[L, A]}        & \fThree{(L, A)}{(A => (L, B))}{(L, B)} \\
+    \texttt{WriterT[F, L, A]}        & \fThree{F[(L, A)]}{(A => F[(L, B)])}{F[(L, B)]} \\
+    \texttt{State[S, A]}         & \fThree{(S =>  (S, A))}{(A => (S => (S, B)))}{(S => (S, B))} \\   \
+    \texttt{StateT[F, S, A]}         & \fThree{(S =>  F[(S, A)])}{(A => (S => F[(S, B)]))}{(S => F[(S, B)])} \\
+
+  \end{tabular}
+  \label{tab:normaltab}
+\end{table}
+
+\begin{table}[ht]
+  \centering
+  \fontfamily{ppl}\selectfont
+  \setlength{\tabcolsep}{5pt}
+  \begin{tabular}{rrrlcll}
+    \texttt{f} & \texttt{f a} &  & \texttt{a -> f b} & & \texttt{f b} \\
+    \midrule
+    \texttt{Id a}               & \fThree{a}{a -> b}{b} \\
+    \texttt{Reader e a}      & \fThree{e -> a}{a -> (e -> b)}{e -> b} \\
+    \texttt{ReaderT f e a}      & \fThree{e -> f a}{a -> (e -> f b)}{e -> f b} \\
+    \texttt{Writer l a}        & \fThree{(l, a)}{a -> (l, b)}{(l, b)} \\
+    \texttt{WriterT f l a}        & \fThree{f (l, a)}{a -> f (l, b)}{f (l, b)} \\
+    \texttt{State s a}         & \fThree{s -> (s, a)}{a -> (s -> (s, b))}{s -> (s, b)} \\   \
+    \texttt{StateT f s a}         & \fThree{s -> f (s, a)}{a -> (s -> f (s, b))}{s -> f (s, b)} \\
+
+  \end{tabular}
+  \label{tab:normaltab}
+\end{table}
+
+\bibliography{sample-handout}
+\bibliographystyle{plainnat}
+
+\fancyfoot[C]{\copyright 2015 Adam S. Rosien (\href{mailto:adam@rosien.net}{\texttt{adam@rosien.net}}) \\
+This work is licensed under a \href{http://creativecommons.org/licenses/by/4.0/}{Creative Commons Attribution 4.0 International License}. \\
+Issues and suggestions welcome at \href{https://github.com/arosien/scalaz-cheatsheets}{\texttt{https://github.com/arosien/scalaz-cheatsheets}}}
+
+\end{document}

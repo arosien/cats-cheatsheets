@@ -1,0 +1,49 @@
+digraph G {
+  rankdir=LR
+  node [fontname=courier shape=none]
+  edge [fontname=courier color=grey fontcolor=grey60]
+  labelloc=t
+  fontname="times-italic"
+  // style=dotted
+  color=white
+
+  subgraph cluster_applicatives {    
+    label=<Semigroupal, Applicative>
+    
+    fab [label=<F[(<font color="red3">A</font>, <font color="blue3">B</font>)]>]
+    fafb [label=<(F[<font color="red3">A</font>], F[<font color="blue3">B</font>])>]
+    fc [label=<F[<font color="purple3">C</font>&#93;>]
+    
+    fafb -> fab [label=product]
+    fab -> fc [label=<map ((<font color="red3">A</font>, <font color="blue3">B</font>) ⇒ <font color="purple3">C</font>)>]
+    
+    fafb -> fc [label=<map2 ((<font color="red3">A</font>, <font color="blue3">B</font>) ⇒ <font color="purple3">C</font>)>]
+  }
+
+  subgraph cluster_functor {
+    label=<Functor, Contravariant, Monad, Traverse>
+
+    # FYI: edges are drawn in bottom-up in their appearance order, so reverse to order last as first
+    gfb [label=<<font face="courier-bold">G</font>[F[<font color="blue3">B</font>&#93;]>]
+
+    fa [label=<F[<font color="red3">A</font>&#93;>]
+    fb [label=<F[<font color="blue3">B</font>&#93;>]
+
+    fa -> fb [label=<flatMap (<font color="red3">A</font> ⇒ F[<font color="blue3">B</font>&#93;)>]
+    fa -> fb [label=<map (<font color="red3">A</font> ⇒ <font color="blue3">B</font>)>]
+    fa -> fb [label=<contramap (<font color="blue3">B</font> ⇒ <font color="red3">A</font>)>]
+    
+    fa -> gfb [label=<traverse (<font color="red3">A</font> ⇒ <font face="courier-bold">G</font>[<font color="blue3">B</font>&#93;)>]
+  }
+  
+  subgraph cluster_monoid {
+    label=Monoid
+
+    1 [label="()"]
+    aa [label=<(<font color="red3">A</font>, <font color="red3">A</font>)>]
+    mon_a [label=<<font color="red3">A</font>>]
+    1 -> mon_a [label=empty]
+    aa -> mon_a [label=combine]
+  }
+
+}
