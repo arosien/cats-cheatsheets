@@ -1,0 +1,81 @@
+= `MonadError`
+:source-highlighter: highlightjs
+
+.Common error-handling methods provided by `MonadError`.
+[graphviz]
+----
+digraph MonadError {
+  rankdir=LR
+  node [fontname=courier shape=none]
+  edge [fontname=courier color=grey]
+  
+  fa [label=<<b>F[<font color="green3">A</font>&#93;</b>>]
+  e [label=<<font color="red3">E</font>>]
+  fa2 [label=<F[<font color="green3">A</font>&#93;>]
+  fb [label=<F[<font color="blue3">B</font>&#93;>]
+  fea [label=<F[Either[<font color="red3">E</font>, <font color="green3">A</font>]&#93;>]
+
+  e -> fa [label=<raise>]
+
+  fa -> fa2 [label=<
+    &nbsp;&nbsp;&nbsp;&nbsp;handleError(f: <font color="red3">E</font> ⇒ <font color="green3">A</font>)
+    <br align="left"/>
+    handleErrorWith(f: <font color="red3">E</font> ⇒ F[<font color="green3">A</font>])
+    <br align="left"/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;recover(f: PartialFunction[<font color="red3">E</font>, <font color="green3">A</font>])
+    <br align="left"/>
+    &nbsp;&nbsp;&nbsp;&nbsp;recoverWith(f: PartialFunction[<font color="red3">E</font>, F[<font color="green3">A</font>]])
+    <br align="left"/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;onError(f: PartialFunction[<font color="red3">E</font>, F[Unit]])
+    <br align="left"/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adaptError(f: <font color="red3">E</font> ⇒ <font color="red3">E</font>)
+    <br align="left"/>
+  >]
+
+  fa:sw -> fea:nw [xlabel="attempt"]
+  fea:ne -> fa:se [label="rethrow"]
+
+  { rank=same; fa, fea, e}
+
+  fa -> fb [label=<
+    &nbsp;&nbsp;&nbsp;&nbsp;redeem(recover: <font color="red3">E</font> ⇒ <font color="blue3">B</font>, &nbsp;&nbsp;&nbsp;f: <font color="green3">A</font> ⇒ <font color="blue3">B</font>)
+    <br align="left"/>
+    redeemWith(recover: <font color="red3">E</font> ⇒ F[<font color="blue3">B</font>], f: <font color="green3">A</font> ⇒ F[<font color="blue3">B</font>])
+    <br align="left"/>
+  >]
+}
+----
+
+https://typelevel.org/cats/api/cats/MonadError.html[`MonadError`] is a typeclass that describes how to raise and handle errors. It is provided by the Typelevel https://typelevel.org/cats[Cats] functional programming library.
+
+The `MonadError[F[_], E]` typeclass has two type parameters:
+
+[horizontal]
+pass:q[`F[_\]`]:: the _effect_ type, which itself takes a type parameter; and
+`E`:: the _error_ type.
+
+For example, the `MonadError` where `F` is `Future` will have error type `Throwable`, i.e., `MonadError[Future, Throwable]`, because failed `Future` values contain a value of type `Throwable`.
+
+Methods of the `MonadError` typeclass are either introduction forms or combinators. 
+
+_Introduction forms_ create a value of the effect type `F`. The most important introduction form provided by `MonadError` is `raise`: 
+
+[source,scala]
+def raise[A](error: E): F[A]
+
+_Combinators_ transform a value of the effect type into another value of the same effect type. There are a few general cases for handling an error:
+
+[horizontal]
+perform a side-effect:: `onError`
+transform the error:: `adaptError` +
+`handleError`, `handleErrorWith` +
+`recover`, `recoverWith`
+transform the entire effect:: `redeem`, `redeemWith`
+expose/hide errors as values:: `attempt` (_expose_) +
+`rethrow` (_hide_)
+
+---
+
+image:essential-effects-cover.jpg[width=200,float="left"] +
+{empty} +
+You can learn more about effects and effectful error handling in the book _Essential Effects_, available at https://essentialeffects.dev.
